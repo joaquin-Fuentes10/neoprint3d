@@ -1,0 +1,4 @@
+NeoPrint 3D — sitio web
+
+La página está en index.html y sus imágenes en assets/.
+Para publicarla desde GitHub Pages, usar la rama main y la carpeta raíz (/).
