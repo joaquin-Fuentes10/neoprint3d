@@ -53,16 +53,17 @@ const selectedProduct=document.querySelector("#selected-product");
 const productSearch=document.querySelector("#product-search");
 const searchEmpty=document.querySelector("#search-empty");
 // Busca cada imagen en las tres ubicaciones posibles.
+// Busca cada imagen en las tres ubicaciones posibles.
 function configurarImagen(img, filename) {
   const rutas = [
     "assets/" + filename,
-    filename,
-    "fotos faltantes NEOPRINT3D/" + filename
+    "fotos faltantes NEOPRINT3D/" + filename,
+    filename
   ];
 
   let intento = 0;
 
-  img.onerror = () => {
+  img.onerror = function () {
     intento++;
 
     if (intento < rutas.length) {
@@ -74,6 +75,7 @@ function configurarImagen(img, filename) {
     }
   };
 
+  img.removeAttribute("src");
   img.src = encodeURI(rutas[0]);
 }
 
