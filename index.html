@@ -52,6 +52,38 @@ const productName=document.querySelector("#product-name");
 const selectedProduct=document.querySelector("#selected-product");
 const productSearch=document.querySelector("#product-search");
 const searchEmpty=document.querySelector("#search-empty");
+// Busca cada imagen en las tres ubicaciones posibles.
+function configurarImagen(img, filename) {
+  const rutas = [
+    "assets/" + filename,
+    filename,
+    "fotos faltantes NEOPRINT3D/" + filename
+  ];
+
+  let intento = 0;
+
+  img.onerror = () => {
+    intento++;
+
+    if (intento < rutas.length) {
+      img.src = encodeURI(rutas[intento]);
+    } else {
+      img.removeAttribute("src");
+      img.alt = "Imagen no disponible";
+      img.classList.add("imagen-no-disponible");
+    }
+  };
+
+  img.src = encodeURI(rutas[0]);
+}
+
+// Corrige las fotos de las portadas y la carta de colores.
+document.querySelectorAll(
+  ".category-mosaic img, #color-guide-photo img"
+).forEach(img => {
+  const filename = img.getAttribute("src").split("/").pop();
+  configurarImagen(img, filename);
+});
 productSearch.addEventListener("input",()=>{
  const query=productSearch.value.trim().toLocaleLowerCase("es");let visible=0;
  productGrid.querySelectorAll(".product-section").forEach((section)=>{
@@ -73,17 +105,29 @@ document.querySelectorAll(".category-card").forEach((card)=>{
   productGrid.innerHTML=category.secciones.length?category.secciones.map((section)=>
    '<section class="product-section"><h3>'+section.titulo+'</h3><div class="product-grid">'+section.productos.map((product)=>{
     const photos=product.imagenes||[product.imagen];
-    const photoMarkup=photos.map((filename,index)=>'<button class="photo-open" type="button" aria-label="Ver foto '+(index+1)+' de '+product.nombre+'" data-caption="'+product.nombre+'"><img src="assets/'+filename+'" alt="" loading="lazy"></button>').join('');
+    const photoMarkup=photos.map((filename,index)=>'<button class="photo-open" type="button" aria-label="Ver foto '+(index+1)+' de '+product.nombre+'" data-caption="'+product.nombre+'"><img src="assets/'+filename+'" data-filename="'+filename+'" alt="" loading="lazy"></button>').join('');
     return '<article class="product-card"><div class="product-picture"><div class="product-photo-list'+(photos.length>1?' multiple':'')+'">'+photoMarkup+'</div></div>'+( /personalizad[oa]s?|con nombre|nombre y/i.test(product.nombre)?'<span class="customizable-tag">Personalizable</span>':'')+'<div class="product-copy"><h3>'+product.nombre+'</h3><p>Consultá colores, medidas y opciones personalizadas.</p><button type="button" class="price-button" data-product="'+product.nombre+'">Consultar por WhatsApp ↗</button></div></article>'
    }).join('')+'</div></section>'
   ).join(''):'<div class="empty-state"><span class="eyebrow">Galería en preparación</span><h3>Pronto vas a encontrar muestras acá</h3><p>Cuando elijamos los modelos, los organizamos en esta categoría.</p><a class="btn btn-main" href="#formulario">Consultar una idea a medida</a></div>';
-  categoryHome.hidden=true;gallery.hidden=false;document.querySelector("#catalogo").scrollIntoView({behavior:"smooth"});
+  productGrid.querySelectorAll("img[data-filename]").forEach(img => {
+  configurarImagen(img, img.dataset.filename);
+});
+
+categoryHome.hidden=true;
+gallery.hidden=false;
+document.querySelector("#catalogo").scrollIntoView({behavior:"smooth"});
  });
 });
 document.querySelector("#back-to-categories").addEventListener("click",()=>{gallery.hidden=true;categoryHome.hidden=false});
 const photoViewer=document.querySelector("#photo-viewer");
 const photoViewerImage=document.querySelector("#photo-viewer-image");
-document.querySelector("#color-guide-photo").addEventListener("click",()=>{photoViewerImage.src="assets/colores-disponibles-filamento-pla.jpg";photoViewerImage.alt="Carta de colores disponibles de filamento PLA";document.querySelector("#photo-viewer-caption").textContent="Colores disponibles de filamento PLA";photoViewer.showModal()});
+document.querySelector("#color-guide-photo").addEventListener("click",()=>{
+  const guideImage = document.querySelector("#color-guide-photo img");
+  photoViewerImage.src = guideImage.src;
+  photoViewerImage.alt = "Carta de colores disponibles de filamento PLA";
+  document.querySelector("#photo-viewer-caption").textContent = "Colores disponibles de filamento PLA";
+  photoViewer.showModal();
+});
 productGrid.addEventListener("click",(event)=>{
  const photoButton=event.target.closest(".photo-open");
  if(photoButton){
